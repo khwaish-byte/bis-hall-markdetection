@@ -1,0 +1,252 @@
+/* ---------- GLOBAL ---------- */
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+  background: #f5f7fa;
+}
+
+/* App container */
+.app {
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #111;
+  transition: 0.5s ease;
+}
+
+.app.dark {
+  background: #1a1d21;
+  color: #e5e7eb;
+}
+
+/* ---------- HEADER ---------- */
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.main-header h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #444;
+}
+
+.app.dark .subtitle {
+  color: #aaa;
+}
+
+.dark-mode-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #444;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.app.dark .dark-mode-btn {
+  background: #333;
+}
+
+/* ---------- TABS ---------- */
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.tab {
+  padding: 12px 24px;
+  border-radius: 10px;
+  background: #d1d5db;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.25s;
+}
+
+.tab:hover {
+  background: #c5cad4;
+}
+
+.tab.active {
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+}
+
+.app.dark .tab {
+  background: #374151;
+  color: #ddd;
+}
+.app.dark .tab.active {
+  background: #3b82f6;
+  color: white;
+}
+
+/* ---------- CARD ---------- */
+
+.card {
+  background: white;
+  max-width: 650px;
+  margin: 0 auto 32px auto;
+  padding: 26px;
+  border-radius: 16px;
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.1);
+}
+
+.app.dark .card {
+  background: #2a2d31;
+  box-shadow: 0px 6px 18px rgba(255,255,255,0.05);
+}
+
+/* ---------- INPUT ---------- */
+
+.input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  background: #fafafa;
+  font-size: 16px;
+}
+
+.app.dark .input {
+  background: #3a3f45;
+  border: 1px solid #555;
+  color: white;
+}
+
+/* ---------- BUTTONS ---------- */
+
+button {
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.btn-primary,
+.btn-success {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  margin-top: 12px;
+  color: white;
+}
+
+.btn-primary {
+  background: #2563eb;
+}
+.btn-primary:hover {
+  background: #1e4ed8;
+}
+
+.btn-success {
+  background: #059669;
+}
+.btn-success:hover {
+  background: #047857;
+}
+
+/* ---------- DRAG & DROP ---------- */
+
+.drop-zone {
+  width: 100%;
+  padding: 30px;
+  margin: 12px 0;
+  border: 2px dashed #999;
+  border-radius: 16px;
+  text-align: center;
+  background: #f3f4f6;
+  transition: 0.3s;
+}
+
+.drop-zone.active {
+  border-color: #2563eb;
+  background: #e6f0ff;
+}
+
+.app.dark .drop-zone {
+  background: #2e3236;
+  border-color: #555;
+  color: #ddd;
+}
+
+.app.dark .drop-zone.active {
+  background: #1f2937;
+  border-color: #60a5fa;
+}
+
+/* ---------- RESULT CARD ---------- */
+
+.result-card {
+  padding: 18px;
+  border-radius: 12px;
+  margin-top: 16px;
+  font-size: 15px;
+  border-left-width: 5px;
+  border-left-style: solid;
+}
+
+.result-valid {
+  background: #d1fae5;
+  border-left-color: #10b981;
+}
+
+.result-warning {
+  background: #fef3c7;
+  border-left-color: #f59e0b;
+}
+
+.result-error {
+  background: #fee2e2;
+  border-left-color: #ef4444;
+}
+
+.result-neutral {
+  background: #e5e7eb;
+  border-left-color: #6b7280;
+}
+
+.ocr-details summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+pre {
+  white-space: pre-wrap;
+  margin-top: 8px;
+  background: rgba(0,0,0,0.05);
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.app.dark pre {
+  background: rgba(255,255,255,0.06);
+  color: #ddd;
+}
+
+/* ---------- FOOTER ---------- */
+
+.footer {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 40px;
+  opacity: 0.7;
+}
