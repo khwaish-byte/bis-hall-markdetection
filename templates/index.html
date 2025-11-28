@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BIS Dashboard v2 — Refreshed UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#071129; --bg2:#071224; --card:rgba(255,255,255,0.03);
+    --muted:#9fb0c8; --accent:#6d28d9; --accent-2:#2563eb;
+    --good:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e8f0fb}
+  .container{max-width:1200px;margin:28px auto;padding:18px;display:grid;grid-template-columns:420px 1fr;gap:18px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  h1{margin:0;font-size:20px}
+  .sub{color:var(--muted);font-size:13px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); padding:14px; border-radius:12px}
+  .uploader{display:flex;gap:12px;align-items:flex-start}
+  .drop{flex:1;border-radius:10px;border:2px dashed rgba(255,255,255,0.04);min-height:150px;padding:12px;display:flex;flex-direction:column;gap:10px;background:rgba(6,10,20,0.25)}
+  .drop.drag{border-color: rgba(109,40,217,0.7); box-shadow:0 8px 30px rgba(109,40,217,0.06)}
+  .preview{width:120px;height:120px;border-radius:10px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .preview img{width:100%;height:100%;object-fit:cover}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer;border:0}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#4c1d95);color:white}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .meta{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:13px}
+  .result{margin-top:12px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.01)}
+  .status{display:inline-block;padding:6px 8px;border-radius:999px;font-weight:800;font-size:12px}
+  .status.valid{color:var(--good);background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.06)}
+  .status.suspicious{color:var(--warn);background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.06)}
+  .status.not_found{color:var(--muted);background:rgba(148,163,184,0.03)}
+  input[type="file"]{display:none}
+  .right{display:grid;gap:12px;grid-template-rows:auto 1fr}
+  .stats{display:flex;gap:10px}
+  .stat{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02);text-align:center}
+  .history{margin-top:10px;max-height:360px;overflow:auto}
+  .row{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;border:1px solid transparent}
+  .row:hover{background: rgba(255,255,255,0.02)}
+  .small{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);font-weight:600}
+  .raw{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;font-size:13px;color:#dbeafe;max-height:220px;overflow:auto;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:rgba(0,0,0,0.2)}
+  .toast{position:fixed;right:22px;bottom:22px;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.6), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.04);color:#e6f0ff}
+  .muted{color:var(--muted);font-size:13px}
+  .tiny{font-size:12px;color:var(--muted)}
+  .flex{display:flex;align-items:center;gap:8px}
+  .download{background:transparent;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+  @media(max-width:960px){.container{grid-template-columns:1fr;padding:12px}}
+</style>
+</head>
+<body>
+  <div class="container">
+    <div>
+      <header>
+        <div>
+          <h1>BIS Verifier — Dashboard v2</h1>
+          <div class="sub">Improved UI • drag & drop • reliable uploads</div>
+        </div>
+        <div style="text-align:right">
+          <div class="tiny">Backend</div>
+          <div id="apiBase" class="muted">http://localhost:4000</div>
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="uploader">
+          <div class="drop" id="dropzone" aria-label="Drop image here">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:800">Drop an image or choose file</div>
+                <div class="muted" style="margin-top:6px">Focus on the CM/L / IS text area for best OCR</div>
+              </div>
+              <div class="preview" id="preview">Preview</div>
+            </div>
+
+            <div style="margin-top:10px">
+              <div class="controls">
+                <label for="fileInput" class="btn ghost">Choose file</label>
+                <input id="fileInput" type="file" accept="image/*">
+                <button id="uploadBtn" class="btn primary">Upload & Scan</button>
+                <button id="clearBtn" class="btn ghost">Clear</button>
+                <div id="progress" class="tiny" style="margin-left:6px;align-self:center"></div>
+              </div>
+            </div>
+
+            <div class="meta" style="margin-top:8px">
+              <div class="tiny">Accepted: JPEG, PNG • Max 6MB</div>
+              <div id="fileName" class="tiny"></div>
+            </div>
+
+            <div id="uinfo" style="margin-top:8px" class="tiny"></div>
+          </div>
+        </div>
+
+        <div id="scanResult" class="result" style="display:none;margin-top:12px"></div>
+
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <input id="licenseInput" placeholder="CM/L-1234567" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+          <button id="verifyBtn" class="btn primary">Verify</button>
+        </div>
+
+        <div id="verifyResult" class="result" style="display:none;margin-top:12px"></div>
+      </div>
+
+      <div style="margin-top:12px" class="muted">This client uses <strong>/scan</strong> (multipart/form-data) and <strong>/verify</strong> (JSON). If you run into CORS/clipboard quirks, serve the page from a static server (e.g., `npx http-server`). :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}</div>
+    </div>
+
+    <div class="right">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="tiny">Live Stats</div>
+            <div style="font-weight:800;font-size:18px">Activity Overview</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="reverseBtn" class="small">Reverse</button>
+            <button id="clearHistory" class="small">Clear</button>
+          </div>
+        </div>
+
+        <div class="stats" style="margin-top:12px">
+          <div class="stat"><div class="tiny">Total</div><strong id="sTotal">0</strong></div>
+          <div class="stat"><div class="tiny">Valid</div><strong id="sValid">0</strong></div>
+          <div class="stat"><div class="tiny">Suspicious</div><strong id="sSusp">0</strong></div>
+          <div class="stat"><div class="tiny">Not found</div><strong id="sNot">0</strong></div>
+        </div>
+
+        <div class="history" id="history" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="tiny">Detail</div>
+            <div style="font-weight:800">Raw OCR & Payload</div>
+          </div>
+          <div>
+            <button id="downloadRaw" class="small">Download</button>
+          </div>
+        </div>
+        <div id="detail" class="raw" style="margin-top:10px">Select an item to view details</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none"></div>
+
+<script>
+/* ------------- CONFIG ------------- */
+const API_BASE = 'http://localhost:4000'; // change if needed
+document.getElementById('apiBase').textContent = API_BASE;
+
+/* ------------- STATE ------------- */
+let selectedFile = null;
+let previewUrl = null;
+let history = JSON.parse(localStorage.getItem('bis_history_v2') || '[]');
+
+/* ------------- HELPERS ------------- */
+function showToast(msg, type='info'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display='block';
+  t.style.borderColor = type==='error'? 'rgba(239,68,68,0.2)': 'transparent';
+  setTimeout(()=> t.style.display='none', 3000);
+}
+function saveHistory(){ localStorage.setItem('bis_history_v2', JSON.stringify(history)); renderHistory(); updateStats(); }
+function pretty(ts){ return new Date(ts).toLocaleString(); }
+function resetUploadUI(){ selectedFile=null; if(previewUrl){ URL.revokeObjectURL(previewUrl); previewUrl=null } document.getElementById('preview').innerHTML='Preview'; document.getElementById('fileName').textContent=''; document.getElementById('scanResult').style.display='none' }
+
+/* ------------- UI RENDER ------------- */
+function setPreview(file){
+  selectedFile = file;
+  if(previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = file ? URL.createObjectURL(file) : null;
+  document.getElementById('preview').innerHTML = previewUrl ? `<img src="${previewUrl}" />` : 'Preview';
+  document.getElementById('fileName').textContent = file ? file.name : '';
+  document.getElementById('uinfo').textContent = file ? `${Math.round(file.size/1024)} KB • ${file.type}` : '';
+}
+
+function renderScanResult(res){
+  const el = document.getElementById('scanResult'); el.style.display='block';
+  const ex = res.extracted || {};
+  const status = res.status || 'not_found';
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="tiny">Detected</div>
+        <div style="font-weight:800">${ex.licenseNumber || '—'} <span class="muted" style="margin-left:8px">${ex.standardCode||''}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="tiny">Status</div>
+        <div class="status ${status}">${status}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button id="useBtn" class="small">Use for verify</button>
+      <button id="copyBtn" class="small">Copy</button>
+      <button id="rawBtn" class="small">Show OCR</button>
+    </div>
+  `;
+  document.getElementById('useBtn').onclick = ()=> { document.getElementById('licenseInput').value = ex.licenseNumber || ''; showToast('Copied to manual verify','info') }
+  document.getElementById('copyBtn').onclick = async ()=> { try{ await navigator.clipboard.writeText(ex.licenseNumber || ''); showToast('Copied'); } catch(e){ showToast('Copy failed','error') } }
+  document.getElementById('rawBtn').onclick = ()=> { document.getElementById('detail').textContent = res.rawText || JSON.stringify(res, null, 2) }
+}
+
+function renderVerifyResult(res){
+  const el = document.getElementById('verifyResult'); el.style.display='block';
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+    <div><div class="tiny">Result</div><div style="font-weight:800">${res.status||'—'}</div></div>
+    <div><button class="small" id="copyVerify">Copy</button></div>
+  </div>
+  <div style="margin-top:8px" class="raw">${JSON.stringify(res, null, 2)}</div>`;
+  document.getElementById('copyVerify').onclick = async ()=> { try{ await navigator.clipboard.writeText(JSON.stringify(res)); showToast('Copied verify JSON') } catch(e){ showToast('Copy failed','error') } }
+}
+
+function renderHistory(){
+  const container = document.getElementById('history'); container.innerHTML='';
+  if(history.length===0){ container.innerHTML='<div class="tiny" style="padding:10px;color:var(--muted)">No activity yet</div>'; return; }
+  for(const item of history){
+    const row = document.createElement('div'); row.className='row';
+    row.innerHTML = `<div style="min-width:120px" class="tiny">${pretty(item.ts)}</div>
+      <div style="flex:1">${item.type==='scan'? (item.extracted?.licenseNumber || item.fileName) : (item.license || '')}</div>
+      <div style="min-width:110px;text-align:right"><span class="status ${item.status||'not_found'}" style="padding:6px 8px;border-radius:999px">${item.status||'—'}</span></div>
+      <div style="min-width:140px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="small copy">Copy</button>
+        <button class="small view">View</button>
+      </div>`;
+    row.querySelector('.copy').onclick = async ()=> { try{ await navigator.clipboard.writeText(item.type==='scan'? (item.extracted?.licenseNumber||'') : (item.license||'')); showToast('Copied') }catch(e){ showToast('Copy failed','error') } };
+    row.querySelector('.view').onclick = ()=> { document.getElementById('detail').textContent = JSON.stringify(item, null, 2) };
+    container.appendChild(row);
+  }
+}
+
+function updateStats(){
+  const total = history.length;
+  const valid = history.filter(h=>h.status==='valid').length;
+  const susp = history.filter(h=>h.status==='suspicious').length;
+  const notf = history.filter(h=>h.status==='not_found').length;
+  document.getElementById('sTotal').textContent = total;
+  document.getElementById('sValid').textContent = valid;
+  document.getElementById('sSusp').textContent = susp;
+  document.getElementById('sNot').textContent = notf;
+}
+
+/* ------------- Events & Upload logic ------------- */
+const drop = document.getElementById('dropzone');
+
+drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('drag') });
+drop.addEventListener('dragleave', ()=>{ drop.classList.remove('drag') });
+drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('drag'); const f = e.dataTransfer.files?.[0]; if(f) handleFile(f) });
+
+document.getElementById('fileInput').addEventListener('change', (e)=> { const f = e.target.files?.[0]; if(f) handleFile(f) });
+
+document.getElementById('clearBtn').addEventListener('click', ()=> { resetUploadUI(); showToast('Cleared') });
+
+document.getElementById('reverseBtn').addEventListener('click', ()=> { history.reverse(); saveHistory(); showToast('Reversed') });
+document.getElementById('clearHistory').addEventListener('click', ()=> { history = []; saveHistory(); showToast('History cleared') });
+
+document.getElementById('downloadRaw').addEventListener('click', ()=> {
+  const txt = document.getElementById('detail').textContent || '';
+  if(!txt){ showToast('No detail to download','error'); return; }
+  const blob = new Blob([txt], {type:'text/plain'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'bis_detail.txt'; a.click(); URL.revokeObjectURL(url);
+});
+
+/* robust file handler */
+function handleFile(file){
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Please upload an image file','error'); return; }
+  if(file.size > 6*1024*1024){ showToast('Image too large (max 6MB)','error'); return; }
+  setPreview(file);
+  showToast('File ready');
+}
+
+function setPreview(file){
+  selectedFile = file;
+  if(previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = file ? URL.createObjectURL(file) : null;
+  document.getElementById('preview').innerHTML = previewUrl ? `<img src="${previewUrl}" />` : 'Preview';
+  document.getElementById('fileName').textContent = file ? file.name : '';
+  document.getElementById('uinfo').textContent = file ? `${Math.round(file.size/1024)} KB • ${file.type}` : '';
+}
+
+/* Upload + progress with fetch (XHR for progress) */
+function uploadWithProgress(file){
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const form = new FormData();
+    form.append('image', file);
+    const progressEl = document.getElementById('progress');
+    xhr.open('POST', API_BASE + '/scan');
+    xhr.responseType = 'json';
+    xhr.upload.onprogress = (e) => {
+      if(e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        progressEl.textContent = `Uploading ${pct}%`;
+      } else progressEl.textContent = 'Uploading...';
+    };
+    xhr.onload = () => {
+      progressEl.textContent = '';
+      if(xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+      else reject(xhr.response || new Error('Upload failed'));
+    };
+    xhr.onerror = () => { progressEl.textContent = ''; reject(new Error('Network error')) };
+    xhr.send(form);
+  });
+}
+
+/* button actions */
+document.getElementById('uploadBtn').addEventListener('click', async ()=>{
+  if(!selectedFile){ showToast('Select an image first','error'); return; }
+  const btn = document.getElementById('uploadBtn'); btn.disabled=true; btn.textContent='Scanning...';
+  try{
+    const data = await uploadWithProgress(selectedFile);
+    if(!data){ showToast('No response','error'); return; }
+    renderScanResult(data);
+    history.unshift({ id: Date.now(), ts: new Date().toISOString(), type:'scan', fileName:selectedFile.name, extracted: data.extracted || null, status: data.status || 'not_found', rawText: data.rawText || '' });
+    if(history.length>80) history.pop();
+    saveHistory();
+    showToast('Scan complete','success');
+  }catch(err){
+    console.error(err);
+    const msg = err?.error || err?.message || (err?.message) || 'Scan failed';
+    showToast(msg,'error');
+  }finally{ btn.disabled=false; btn.textContent='Upload & Scan'; document.getElementById('progress').textContent='' }
+});
+
+document.getElementById('verifyBtn').addEventListener('click', async ()=>{
+  const license = document.getElementById('licenseInput').value.trim();
+  if(!license){ showToast('Enter license number','error'); return; }
+  const btn = document.getElementById('verifyBtn'); btn.disabled=true; btn.textContent='Verifying...';
+  try{
+    const res = await fetch(API_BASE + '/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ licenseNumber: license })});
+    const data = await res.json();
+    if(!res.ok) { showToast(data.error || data.message || 'Verify failed','error'); }
+    else {
+      renderVerifyResult(data);
+      history.unshift({ id: Date.now(), ts: new Date().toISOString(), type:'manual', license, status: data.status || 'unknown', data: data.data || null });
+      if(history.length>80) history.pop();
+      saveHistory();
+      showToast('Verify complete','success');
+    }
+  }catch(e){
+    console.error(e); showToast('Verify error','error');
+  } finally{ btn.disabled=false; btn.textContent='Verify' }
+});
+
+/* init */
+(function init(){
+  renderHistory();
+  updateStats();
+})();
+</script>
+</body>
+</html>
